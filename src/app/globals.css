@@ -74,3 +74,15 @@
     @apply bg-background text-foreground;
   }
 }
+.centered-div {
+  height: 60vh;
+  min-height: 350px;
+}
+.logo-card {
+  width: 40%;
+  height: 60%;
+}
+
+.b {
+  background-color: blue;
+}

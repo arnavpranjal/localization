@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Plus, Trash2, RotateCcw } from "lucide-react";
+
+import { Trash2, RotateCcw } from "lucide-react";
 import { EditIcon } from "lucide-react";
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function Roles() {
   const [showAddDialog, setShowAddDialog] = React.useState(false);
-  // const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+
   const [showDeleteDialog, setShowDeleteDialog] = React.useState({
     open: false,
     roleId: null,
@@ -40,6 +40,9 @@ export default function Roles() {
   const [showResetDialog, setShowResetDialog] = React.useState(false);
 
   const [data, setData] = React.useState([]);
+  const [saveData, setSaveData] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
   const { toast } = useToast();
 
   const handleChange = (index: any, newValue: any) => {
@@ -50,7 +53,7 @@ export default function Roles() {
     });
   };
   const handleCreateRole = async (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
+    e.preventDefault();
 
     try {
       const formData = new FormData(e.target);
@@ -77,18 +80,15 @@ export default function Roles() {
     }
   };
   const handleEditRole = async (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
+    e.preventDefault();
     try {
       const formData = new FormData(e.target);
 
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
       const roleId = formData.get("disabledRole");
-      const displayName = formData.get("displayName"); // Get the displayName value from the form data
+      const displayName = formData.get("displayName");
 
       const editRole = {
-        displayName: displayName, // Pass the displayName value in the request body
+        displayName: displayName,
       };
 
       const response = await axios.put(
@@ -158,21 +158,51 @@ export default function Roles() {
       });
     }
   };
+  const handleSave = async () => {
+    try {
+      const rolesToUpdate = data.filter(
+        (role, index) => role.displayName !== saveData[index].displayName
+      );
+
+      const response = await axios.post(
+        "http://localhost:3001/roles/save",
+        rolesToUpdate
+      );
+      console.log(response);
+      fetchData();
+      toast({
+        title: "roles saved successfully",
+        description: "The roles were saved successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+      });
+    }
+  };
   const fetchData = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.get("http://localhost:3001/roles");
       setData(response.data);
+      setSaveData(response.data);
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       console.error("Error fetching data:", error);
     }
   };
   useEffect(() => {
     fetchData();
   }, []);
+
+  if (isLoading) return "Loading...";
   return (
     <>
-      <div className="flex">
-        <Card className="pt-2 flex-1 mr-1">
+      <div className="flex ">
+        <Card className="pt-2 flex-1 mr-1 min-w-[250px]">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -188,15 +218,17 @@ export default function Roles() {
           <div>
             <ul>
               {data.map((item, index) => (
-                <div key={index} style={{ borderTop: "1px solid #e2e8f0" }}>
-                  <li className="p-2.5">{item.systemName}</li>
+                <div key={index} className="border-t border-gray-300 ">
+                  <li className="p-2.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                    {item.systemName}
+                  </li>
                 </div>
               ))}
             </ul>
           </div>
         </Card>
 
-        <Card className="pt-2 flex-1 ml-1">
+        <Card className="pt-2 flex-1 ml-1 min-w-[250px]">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -213,14 +245,11 @@ export default function Roles() {
               {data.map((item, index) => (
                 <div
                   key={index}
-                  style={{
-                    borderTop: "1px solid #e2e8f0",
-                  }}
-                  className="flex items-center"
+                  className="flex items-center border-t border-gray-300"
                 >
                   <input
                     type="text"
-                    className="p-2.5 flex-1"
+                    className="p-2.5 flex-1 whitespace-nowrap overflow-ellipsis"
                     value={item.displayName}
                     id={item.systemName}
                     onChange={(e) => handleChange(index, e.target.value)}
@@ -256,7 +285,6 @@ export default function Roles() {
                   />
                   <EditIcon
                     className="h-4 w-4 cursor-pointer text-gray-700 mr-2"
-                    // onClick={() => setShowEditDialog(true)}
                     onClick={() =>
                       setShowEditDialog({
                         open: true,
@@ -272,7 +300,11 @@ export default function Roles() {
       </div>
 
       <div className="flex justify-end mt-2">
-        <Button className="bg-primary hover:bg-primary text-white font-bold rounded focus:outline-none focus:shadow-outline w-24">
+        <Button
+          className="bg-primary hover:bg-primary text-white font-bold rounded focus:outline-none focus:shadow-outline w-24"
+          disabled={JSON.stringify(data) === JSON.stringify(saveData)}
+          onClick={handleSave}
+        >
           Save
         </Button>
       </div>
