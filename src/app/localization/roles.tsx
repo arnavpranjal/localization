@@ -15,14 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -38,21 +35,26 @@ export default function Roles() {
     roleId: null,
   });
   const [showResetDialog, setShowResetDialog] = React.useState(false);
+  interface Role {
+    systemName: string;
+    displayName: string;
+    default: boolean;
+  }
 
-  const [data, setData] = React.useState([]);
-  const [saveData, setSaveData] = React.useState([]);
+  const [data, setData] = React.useState<Role[]>([]);
+  const [saveData, setSaveData] = React.useState<Role[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const { toast } = useToast();
 
   const handleChange = (index: any, newValue: any) => {
     setData((prevData) => {
-      const newData = [...prevData];
+      const newData: any = [...prevData];
       newData[index] = { ...newData[index], displayName: newValue };
       return newData;
     });
   };
-  const handleCreateRole = async (e) => {
+  const handleCreateRole = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -79,7 +81,7 @@ export default function Roles() {
       });
     }
   };
-  const handleEditRole = async (e) => {
+  const handleEditRole = async (e: any) => {
     e.preventDefault();
     try {
       const formData = new FormData(e.target);
@@ -112,14 +114,8 @@ export default function Roles() {
       });
     }
   };
-  const handleDeleteRole = async (roleId: string) => {
+  const handleDeleteRole = async (roleId: string | null) => {
     try {
-      const deleteRole = {
-        role: roleId,
-      };
-
-      console.log(roleId);
-
       const response = await axios.delete(
         `http://localhost:3001/roles/${roleId}`
       );
@@ -161,7 +157,8 @@ export default function Roles() {
   const handleSave = async () => {
     try {
       const rolesToUpdate = data.filter(
-        (role, index) => role.displayName !== saveData[index].displayName
+        (role: any, index: any) =>
+          role.displayName !== saveData[index].displayName
       );
 
       const response = await axios.post(
@@ -200,9 +197,9 @@ export default function Roles() {
 
   if (isLoading) return "Loading...";
   return (
-    <>
-      <div className="flex ">
-        <Card className="pt-2 flex-1 mr-1 min-w-[250px]">
+    <div className="w-full">
+      <div className="flex justify-between w-full">
+        <Card className="pt-2 card-input min-w-[250px]">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -217,9 +214,9 @@ export default function Roles() {
 
           <div>
             <ul>
-              {data.map((item, index) => (
-                <div key={index} className="border-t border-gray-300 ">
-                  <li className="p-2.5 whitespace-nowrap overflow-hidden text-ellipsis">
+              {data.map((item: any, index: any) => (
+                <div key={index} className="border-t border-gray-300">
+                  <li className="p-2.5  whitespace-nowrap overflow-hidden text-ellipsis">
                     {item.systemName}
                   </li>
                 </div>
@@ -228,7 +225,7 @@ export default function Roles() {
           </div>
         </Card>
 
-        <Card className="pt-2 flex-1 ml-1 min-w-[250px]">
+        <Card className="pt-2 card-input min-w-[250px] ">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -242,14 +239,14 @@ export default function Roles() {
           </div>
           <div>
             <ul>
-              {data.map((item, index) => (
+              {data.map((item: any, index: any) => (
                 <div
                   key={index}
                   className="flex items-center border-t border-gray-300"
                 >
                   <input
                     type="text"
-                    className="p-2.5 flex-1 whitespace-nowrap overflow-ellipsis"
+                    className="p-2.5 flex-1 whitespace-nowrap overflow-ellipsis text-ellipsis"
                     value={item.displayName}
                     id={item.systemName}
                     onChange={(e) => handleChange(index, e.target.value)}
@@ -298,7 +295,6 @@ export default function Roles() {
           </div>
         </Card>
       </div>
-
       <div className="flex justify-end mt-2">
         <Button
           className="bg-primary hover:bg-primary text-white font-bold rounded focus:outline-none focus:shadow-outline w-24"
@@ -366,7 +362,7 @@ export default function Roles() {
                 type="text"
                 id="role"
                 name="role"
-                value={showEditDialog.roleId}
+                value={showEditDialog.roleId ? showEditDialog.roleId : ""}
                 spellCheck="false"
                 disabled
                 required
@@ -392,12 +388,12 @@ export default function Roles() {
             <input
               type="hidden"
               name="disabledRole"
-              value={showEditDialog.roleId}
+              value={showEditDialog.roleId ? showEditDialog.roleId : ""}
             />
 
             <div className="flex items-center justify-between">
               <a
-                onClick={() => setShowEditDialog(false)}
+                onClick={() => setShowEditDialog({ open: false, roleId: null })}
                 className="cursor-pointer bg-gray-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Cancel
@@ -413,10 +409,7 @@ export default function Roles() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
-        open={showDeleteDialog.open}
-        onOpenChange={setShowDeleteDialog}
-      >
+      <AlertDialog open={showDeleteDialog.open}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -460,6 +453,6 @@ export default function Roles() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

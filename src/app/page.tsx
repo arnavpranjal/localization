@@ -1,4 +1,5 @@
-import Image from "next/image";
+"use client";
+
 import Page from "./localization/page";
 import { Toaster } from "@/components/ui/toaster";
 export default function Home() {

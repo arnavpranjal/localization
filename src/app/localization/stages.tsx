@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Plus, Trash2, RotateCcw } from "lucide-react";
+
+import { Trash2, RotateCcw } from "lucide-react";
 import { EditIcon } from "lucide-react";
 import { CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,21 +15,25 @@ import {
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function Stages() {
-  const [saveData, setSaveData] = React.useState([]);
   const [showAddDialog, setShowAddDialog] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(true);
+
+  interface Stage {
+    systemName: string;
+    displayName: string;
+    default: boolean;
+  }
+  const [data, setData] = React.useState<Stage[]>([]);
+  const [saveData, setSaveData] = React.useState<Stage[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState({
     open: false,
     roleId: null,
@@ -40,7 +44,6 @@ export default function Stages() {
   });
   const [showResetDialog, setShowResetDialog] = React.useState(false);
 
-  const [data, setData] = React.useState([]);
   const { toast } = useToast();
 
   const handleChange = (index: any, newValue: any) => {
@@ -74,7 +77,7 @@ export default function Stages() {
       });
     }
   };
-  const handleCreateRole = async (e) => {
+  const handleCreateRole = async (e: any) => {
     e.preventDefault();
 
     try {
@@ -104,7 +107,7 @@ export default function Stages() {
       });
     }
   };
-  const handleEditRole = async (e) => {
+  const handleEditRole = async (e: any) => {
     e.preventDefault();
     try {
       const formData = new FormData(e.target);
@@ -137,12 +140,8 @@ export default function Stages() {
       });
     }
   };
-  const handleDeleteRole = async (roleId: string) => {
+  const handleDeleteRole = async (roleId: string | null) => {
     try {
-      const deleteRole = {
-        role: roleId,
-      };
-
       console.log(roleId);
 
       const response = await axios.delete(
@@ -200,9 +199,9 @@ export default function Stages() {
   }, []);
   if (isLoading) return "Loading...";
   return (
-    <>
-      <div className="flex">
-        <Card className="pt-2 flex-1 mr-1 min-w-[250px]">
+    <div className="w-11/12">
+      <div className="flex justify-between w-full">
+        <Card className="pt-2 card-input min-w-[250px]">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -228,7 +227,7 @@ export default function Stages() {
           </div>
         </Card>
 
-        <Card className="pt-2 flex-1 ml-1 min-w-[250px]">
+        <Card className="pt-2 card-input min-w-[250px]">
           <div className="flex item-center">
             <div className="flex-1">
               <h3 className="mb-2 ml-2.5 block text-lg font-medium text-gray-700">
@@ -242,14 +241,14 @@ export default function Stages() {
           </div>
           <div>
             <ul>
-              {data.map((item, index) => (
+              {data.map((item: any, index: any) => (
                 <div
                   key={index}
                   className="flex items-center border-t border-gray-300"
                 >
                   <input
                     type="text"
-                    className="p-2.5 flex-1 whitespace-nowrap overflow-ellipsis"
+                    className="p-2.5 flex-1 whitespace-nowrap overflow-ellipsis text-ellipsis"
                     value={item.displayName}
                     id={item.systemName}
                     onChange={(e) => handleChange(index, e.target.value)}
@@ -366,7 +365,7 @@ export default function Stages() {
                 type="text"
                 id="role"
                 name="role"
-                value={showEditDialog.roleId}
+                value={showEditDialog.roleId ? showEditDialog.roleId : ""}
                 spellCheck="false"
                 disabled
                 required
@@ -392,12 +391,14 @@ export default function Stages() {
             <input
               type="hidden"
               name="disabledRole"
-              value={showEditDialog.roleId}
+              value={showEditDialog.roleId ? showEditDialog.roleId : ""}
             />
 
             <div className="flex items-center justify-between">
               <a
-                onClick={() => setShowEditDialog(false)}
+                onClick={() =>
+                  setShowDeleteDialog({ open: false, roleId: null })
+                }
                 className="cursor-pointer bg-gray-500 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Cancel
@@ -413,10 +414,7 @@ export default function Stages() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog
-        open={showDeleteDialog.open}
-        onOpenChange={setShowDeleteDialog}
-      >
+      <AlertDialog open={showDeleteDialog.open}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -460,6 +458,6 @@ export default function Stages() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

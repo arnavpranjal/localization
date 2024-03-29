@@ -1,14 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import React from "react";
-const FileButton = ({ accept, onChange }) => {
+const FileButton = ({
+  accept,
+  onChange,
+}: {
+  accept?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
   const [fileName, setFileName] = React.useState("");
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
     setFileName(file ? file.name : "");
     onChange(e);
   };
@@ -31,40 +36,41 @@ const FileButton = ({ accept, onChange }) => {
 };
 
 export default function InsertImage({
-  setLogoImage,
   setShowInsertImageDialog,
   updateLogo,
+}: {
+  setShowInsertImageDialog: any;
+  updateLogo: any;
 }) {
-  const [selectedFile, setSelectedFile] = React.useState(null);
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [isDragOver, setIsDragOver] = React.useState(false);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
     setSelectedFile(file);
   };
 
   const handleSaveClick = () => {
-    // setLogoImage(selectedFile);
     updateLogo(selectedFile);
     setShowInsertImageDialog(false);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragEnter = (e) => {
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     const isImage = file.type.startsWith("image/");
@@ -81,8 +87,8 @@ export default function InsertImage({
         <div
           onDragOver={handleDragOver}
           className={`flex flex-col justify-center items-center h-[80%] w-[80%] rounded-[10px] border-[2px] ${
-            selectedFile ? "border-blue-800 " : "border-gray-400 "
-          }`}
+            selectedFile ? "border-blue-800  " : "border-gray-400 "
+          } ${selectedFile ? "bg-stone-300" : ""}`}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
