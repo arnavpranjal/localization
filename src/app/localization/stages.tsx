@@ -199,7 +199,7 @@ export default function Stages() {
   }, []);
   if (isLoading) return "Loading...";
   return (
-    <div className="w-11/12">
+    <div className="w-full">
       <div className="flex justify-between w-full">
         <Card className="pt-2 card-input min-w-[250px]">
           <div className="flex item-center">
