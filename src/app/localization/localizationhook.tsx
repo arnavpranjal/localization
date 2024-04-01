@@ -2,10 +2,16 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
-const fetchDisplayNames = async (
-  setDisplayNames: (value: Record<string, string>) => void
+const fetchRoleDisplayNames = async (
+  setRoleDisplayNames: (value: Record<string, string>) => void
 ) => {
   try {
+    const storedDisplayNames = localStorage.getItem("roleDisplayNames");
+
+    if (storedDisplayNames) {
+      setRoleDisplayNames(JSON.parse(storedDisplayNames));
+      return;
+    }
     const response = await axios.get(`http://localhost:3001/roles`);
 
     const displayNames: Record<string, string> = {};
@@ -14,7 +20,34 @@ const fetchDisplayNames = async (
         displayNames[role.systemName] = role.displayName;
       }
     );
-    setDisplayNames(displayNames);
+    setRoleDisplayNames(displayNames);
+    localStorage.setItem("roleDisplayNames", JSON.stringify(displayNames));
+    return;
+  } catch (error) {
+    console.log("error fetching data :");
+  }
+};
+
+const fetchStageDisplayNames = async (
+  setStageDisplayNames: (value: Record<string, string>) => void
+) => {
+  try {
+    const storedDisplayNames = localStorage.getItem("stageDisplayNames");
+
+    if (storedDisplayNames) {
+      setStageDisplayNames(JSON.parse(storedDisplayNames));
+      return;
+    }
+    const response = await axios.get(`http://localhost:3001/stages`);
+
+    const displayNames: Record<string, string> = {};
+    response.data.forEach(
+      (stage: { systemName: string; displayName: string }) => {
+        displayNames[stage.systemName] = stage.displayName;
+      }
+    );
+    setStageDisplayNames(displayNames);
+    localStorage.setItem("stageDisplayNames", JSON.stringify(displayNames));
     return;
   } catch (error) {
     console.log("error fetching data :");
@@ -22,20 +55,60 @@ const fetchDisplayNames = async (
 };
 
 const useLocalization = () => {
-  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
+  const [roleDisplayNames, setRoleDisplayNames] = useState<
+    Record<string, string>
+  >({});
+
+  const [stageDisplayNames, setStageDisplayNames] = useState<
+    Record<string, string>
+  >({});
   useEffect(() => {
-    fetchDisplayNames(setDisplayNames);
+    fetchRoleDisplayNames(setRoleDisplayNames);
+    fetchStageDisplayNames(setStageDisplayNames);
   }, []);
-  const l = useCallback(
+  const lr = useCallback(
     (inputString: string) => {
-      const displayName = displayNames[inputString] || "";
+      const storedDisplayNames = localStorage.getItem("roleDisplayNames");
+
+      if (storedDisplayNames) {
+        const parsedDisplayNames = JSON.parse(storedDisplayNames);
+        const displayName = parsedDisplayNames[inputString];
+
+        if (displayName) {
+          return displayName;
+        } else {
+          return "";
+        }
+      }
+      const displayName = roleDisplayNames[inputString] || "";
 
       return displayName;
     },
-    [displayNames]
+    [roleDisplayNames]
   );
 
-  return { l };
+  const ls = useCallback(
+    (inputString: string) => {
+      const storedDisplayNames = localStorage.getItem("stageDisplayNames");
+
+      if (storedDisplayNames) {
+        const parsedDisplayNames = JSON.parse(storedDisplayNames);
+        const displayName = parsedDisplayNames[inputString];
+
+        if (displayName) {
+          return displayName;
+        } else {
+          return "";
+        }
+      }
+      const displayName = stageDisplayNames[inputString] || "";
+
+      return displayName;
+    },
+    [stageDisplayNames]
+  );
+
+  return { lr, ls };
 };
 
 export default useLocalization;

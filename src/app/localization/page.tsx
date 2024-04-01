@@ -7,7 +7,7 @@ import Logo from "./logo";
 
 import useLocalization from "./localizationhook";
 export default function Page() {
-  const { l } = useLocalization();
+  const { lr, ls } = useLocalization();
 
   return (
     <ScrollArea className="h-full">
@@ -20,9 +20,12 @@ export default function Page() {
             <TabsTrigger value="demo">Loclization</TabsTrigger>
           </TabsList>
           <TabsContent value="demo">
-            <p>Admin : {l("Admin")} </p>
-            <h1>Deal sponsor : {l("Deal Sponsor")}</h1>
-            <h1>admin : {l("admin")} </h1>
+            <p>Admin : {lr("Admin")} </p>
+            <h1>Deal sponsor : {lr("Deal Sponsor")}</h1>
+            <h1>admin : {lr("admin")} </h1>
+
+            <h1>sksksks : {ls("sksksksk")}</h1>
+            <h1>year1 : {ls("Year-1")}</h1>
           </TabsContent>
           <TabsContent value="roles">
             <Roles />
