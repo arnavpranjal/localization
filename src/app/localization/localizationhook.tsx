@@ -2,34 +2,38 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
-const fetchDisplayName = async (
-  inputString: string,
-  setDisplayName: (value: string) => void
+const fetchDisplayNames = async (
+  setDisplayNames: (value: Record<string, string>) => void
 ) => {
-  const response = await axios.get(
-    `http://localhost:3001/roles/${inputString}`
-  );
+  try {
+    const response = await axios.get(`http://localhost:3001/roles`);
 
-  setDisplayName(response.data.displayName);
-  return;
+    const displayNames: Record<string, string> = {};
+    response.data.forEach(
+      (role: { systemName: string; displayName: string }) => {
+        displayNames[role.systemName] = role.displayName;
+      }
+    );
+    setDisplayNames(displayNames);
+    return;
+  } catch (error) {
+    console.log("error fetching data :");
+  }
 };
 
 const useLocalization = () => {
-  const l = useCallback((inputString: string) => {
-    const startTime = performance.now();
-    const [displayName, setDisplayName] = useState("");
-
-    useEffect(() => {
-      fetchDisplayName(inputString, setDisplayName);
-    }, []);
-
-    const endTime = performance.now();
-    const executionTime = endTime - startTime;
-    console.log(
-      `Execution time for l function with inputString ${inputString}: ${executionTime} ms`
-    );
-    return displayName;
+  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
+  useEffect(() => {
+    fetchDisplayNames(setDisplayNames);
   }, []);
+  const l = useCallback(
+    (inputString: string) => {
+      const displayName = displayNames[inputString] || "";
+
+      return displayName;
+    },
+    [displayNames]
+  );
 
   return { l };
 };
